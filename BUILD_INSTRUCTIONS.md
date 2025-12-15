@@ -16,10 +16,14 @@ npm run electron:dev            # Start Electron in development mode
 
 #### Cross-Platform Builds (Recommended)
 ```bash
-npm run electron:build:all      # Build for Windows, macOS, and Linux
+# Linux (with Wine for Windows builds)
+./build-cross-platform.sh
+
+# Or manual builds:
 npm run electron:build:win       # Build Windows installer and portable
 npm run electron:build:mac       # Build macOS DMG
 npm run electron:build:linux     # Build Linux AppImage
+npm run electron:build:all       # Build for all platforms
 ```
 
 #### Simple Build
@@ -42,9 +46,16 @@ npm run electron:pack           # Build unpacked directory
 
 ## Windows Build Notes
 
-1. **Icon File**: Replace `public/ICON_README.txt` with actual `public/icon.ico`
-2. **Cross-compilation**: Building Windows from Linux may have limitations
-3. **For best results**: Build on Windows target platform
+1. **Cross-compilation**: 
+   - Use `./build-cross-platform.sh` on Linux for Windows builds
+   - Requires Wine for Windows compatibility
+   - Creates both installer and portable versions
+
+2. **Direct Windows builds**:
+   - Run `build-windows.bat` on Windows machine
+   - Creates proper Windows executables without Wine
+
+3. **Icon File**: Replace `public/ICON_README.txt` with actual `public/icon.ico`
 
 ## Troubleshooting
 
@@ -75,3 +86,18 @@ npm run electron:pack           # Build unpacked directory
 ## Development Server
 Access at: http://localhost:3000
 Electron development: `npm run electron:dev`
+
+## Currency and PDF Improvements
+
+### Recent Updates
+✅ **Pakistani Rupees (Rs)**: All currency formatting now uses Rs
+✅ **Compact PDF Layout**: Reduced spacing to fit on single page
+✅ **Optimized Fonts**: Smaller font sizes for better space utilization
+✅ **Fixed Sidebar**: Icons now visible when collapsed
+✅ **Print-Ready PDF**: Compact layout suitable for printing and download
+
+### PDF Features
+- **Single Page**: Optimized to fit most quotations on one page
+- **Pakistani Currency**: All amounts show as "Rs 1,234.56"
+- **Professional Layout**: Clean, compact design with proper spacing
+- **Download Ready**: PDF can be saved and printed directly

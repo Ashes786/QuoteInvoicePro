@@ -89,14 +89,14 @@ export default function Layout({ children, currentView, onViewChange }: LayoutPr
               <button
                 key={item.id}
                 onClick={() => onViewChange(item.id)}
-                className={`w-full flex items-center ${sidebarOpen ? 'justify-start space-x-3' : 'justify-center'} px-4 py-3 rounded-lg transition-colors mb-2 ${
+                className={`w-full flex items-center ${sidebarOpen ? 'justify-start space-x-3' : 'justify-center'} ${sidebarOpen ? 'px-4' : 'px-2'} py-3 rounded-lg transition-colors mb-2 ${
                   currentView === item.id
                     ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600'
                     : 'hover:bg-gray-100 text-gray-700'
                 }`}
                 title={!sidebarOpen ? item.label : undefined}
               >
-                <Icon size={20} />
+                <Icon size={sidebarOpen ? 20 : 18} />
                 {sidebarOpen && <span className="font-medium">{item.label}</span>}
               </button>
             );
@@ -126,17 +126,17 @@ export default function Layout({ children, currentView, onViewChange }: LayoutPr
             <div className="space-y-2">
               <button
                 onClick={() => setShowCompanyProfile(true)}
-                className="w-full flex items-center justify-center px-4 py-3 rounded-lg transition-colors hover:bg-gray-100 text-gray-700"
+                className="w-full flex items-center justify-center px-2 py-3 rounded-lg transition-colors hover:bg-gray-100 text-gray-700"
                 title="Company Profile"
               >
-                <Building size={20} />
+                <Building size={18} />
               </button>
               <button
                 onClick={() => setShowCustomerManager(true)}
-                className="w-full flex items-center justify-center px-4 py-3 rounded-lg transition-colors hover:bg-gray-100 text-gray-700"
+                className="w-full flex items-center justify-center px-2 py-3 rounded-lg transition-colors hover:bg-gray-100 text-gray-700"
                 title="Customers"
               >
-                <Users size={20} />
+                <Users size={18} />
               </button>
             </div>
           )}

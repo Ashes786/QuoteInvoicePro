@@ -54,10 +54,10 @@ export class PDFExporter {
           logoX = pageWidth - 60;
         }
         
-        // Calculate proper image size
-        const logoSize = 35;
+        // Smaller logo for compact layout
+        const logoSize = 25;
         pdf.addImage(companyProfile.companyLogo, 'PNG', logoX, logoY, logoSize, logoSize);
-        yPosition += logoSize + 15;
+        yPosition += logoSize + 8;
       } catch (error) {
         console.warn('Could not add company logo to PDF');
       }
@@ -65,21 +65,21 @@ export class PDFExporter {
 
     // Add company header based on layout
     if (settings.showCompanyInfo && companyProfile && settings.companyInfoPosition !== 'hidden') {
-      pdf.setFontSize(18);
+      pdf.setFontSize(14);
       pdf.setFont(headerFont, 'bold');
       pdf.setTextColor(settings.primaryColor);
       
-      // Always show company info on the left side
+      // Always show company info on left
       let companyX = 20;
       
-      const lineHeight = 7;
+      const lineHeight = 5;
       
       if (companyProfile.companyName) {
         pdf.text(companyProfile.companyName, companyX, yPosition);
-        yPosition += lineHeight + 2;
+        yPosition += lineHeight;
       }
 
-      pdf.setFontSize(10);
+      pdf.setFontSize(8);
       pdf.setFont(headerFont, 'normal');
       pdf.setTextColor(settings.textColor);
       
@@ -93,7 +93,7 @@ export class PDFExporter {
         pdf.text(part, companyX, yPosition);
         yPosition += lineHeight;
       });
-      yPosition += lineHeight;
+      yPosition += 2;
 
       if (companyProfile.companyPhone || companyProfile.companyEmail) {
         if (companyProfile.companyPhone) {
@@ -104,28 +104,28 @@ export class PDFExporter {
           pdf.text(`Email: ${companyProfile.companyEmail}`, companyX, yPosition);
           yPosition += lineHeight;
         }
-        yPosition += lineHeight;
+        yPosition += 2;
       }
     }
 
     // Add horizontal line
     pdf.setDrawColor(settings.borderColor);
-    pdf.setLineWidth(1);
+    pdf.setLineWidth(0.5);
     pdf.line(20, yPosition, pageWidth - 20, yPosition);
-    yPosition += 20;
+    yPosition += 12;
 
     // Add document title
-    pdf.setFontSize(28);
+    pdf.setFontSize(20);
     pdf.setFont(headerFont, 'bold');
     pdf.setTextColor(settings.primaryColor);
     pdf.text(title, pageWidth / 2, yPosition, { align: 'center' });
-    yPosition += 25;
+    yPosition += 18;
 
     // Add another horizontal line
     pdf.setDrawColor(settings.borderColor);
-    pdf.setLineWidth(0.8);
+    pdf.setLineWidth(0.5);
     pdf.line(20, yPosition, pageWidth - 20, yPosition);
-    yPosition += 20;
+    yPosition += 12;
 
     return yPosition;
   }
@@ -136,11 +136,11 @@ export class PDFExporter {
     const tableEndX = pageWidth - 20;
     const tableWidth = tableEndX - tableStartX;
     
-    // Define column widths with better proportions
+    // More compact column widths
     const colWidths = {
-      description: tableWidth * 0.45,      // 45% for description
-      quantity: tableWidth * 0.15,        // 15% for quantity
-      unitPrice: tableWidth * 0.20,       // 20% for unit price
+      description: tableWidth * 0.50,      // 50% for description
+      quantity: tableWidth * 0.12,        // 12% for quantity
+      unitPrice: tableWidth * 0.18,       // 18% for unit price
       total: tableWidth * 0.20            // 20% for total
     };
     
@@ -154,52 +154,52 @@ export class PDFExporter {
     // Table header background
     if (settings.headerBackgroundColor !== '#ffffff') {
       pdf.setFillColor(settings.headerBackgroundColor);
-      pdf.rect(tableStartX, yPosition - 6, tableWidth, 10, 'F');
+      pdf.rect(tableStartX, yPosition - 5, tableWidth, 8, 'F');
     }
 
-    // Table headers with proper alignment
+    // Table headers with smaller font
     pdf.setFont(headerFont, 'bold');
-    pdf.setFontSize(11);
+    pdf.setFontSize(9);
     pdf.setTextColor(settings.headerTextColor);
     pdf.text('Item Description', colPositions.description + 2, yPosition);
-    pdf.text('Qty', colPositions.quantity + 10, yPosition, { align: 'center' });
-    pdf.text('Unit Price', colPositions.unitPrice + 15, yPosition, { align: 'center' });
+    pdf.text('Qty', colPositions.quantity + 8, yPosition, { align: 'center' });
+    pdf.text('Unit Price', colPositions.unitPrice + 12, yPosition, { align: 'center' });
     pdf.text('Total', colPositions.total, yPosition, { align: 'right' });
-    yPosition += 10;
+    yPosition += 8;
 
     // Table header line
     pdf.setDrawColor(settings.borderColor);
-    pdf.setLineWidth(0.5);
+    pdf.setLineWidth(0.3);
     pdf.line(tableStartX, yPosition, tableEndX, yPosition);
-    yPosition += 8;
+    yPosition += 5;
 
-    // Table items with consistent row height
+    // Table items with smaller font and tighter spacing
     pdf.setFont(bodyFont, 'normal');
-    pdf.setFontSize(10);
+    pdf.setFontSize(8);
     pdf.setTextColor(settings.textColor);
     
     items.forEach((item, index) => {
       // Add alternating row background
       if (settings.tableStyle === 'striped' && index % 2 === 1) {
         pdf.setFillColor('#f8f9fa');
-        pdf.rect(tableStartX, yPosition - 4, tableWidth, 16, 'F');
+        pdf.rect(tableStartX, yPosition - 2, tableWidth, 12, 'F');
       }
       
       // Calculate row height based on text wrapping
       const descriptionLines = pdf.splitTextToSize(item.name, colWidths.description - 4);
-      const rowHeight = Math.max(16, descriptionLines.length * 5 + 6);
+      const rowHeight = Math.max(12, descriptionLines.length * 4 + 4);
       
       // Write description
-      let currentY = yPosition + 5;
+      let currentY = yPosition + 3;
       descriptionLines.forEach((line: string) => {
         pdf.text(line, colPositions.description + 2, currentY);
-        currentY += 5;
+        currentY += 4;
       });
       
       // Write other values (vertically centered)
       const centerY = yPosition + rowHeight / 2;
-      pdf.text(item.quantity.toString(), colPositions.quantity + 10, centerY, { align: 'center' });
-      pdf.text(this.formatCurrency(item.unitPrice), colPositions.unitPrice + 15, centerY, { align: 'center' });
+      pdf.text(item.quantity.toString(), colPositions.quantity + 8, centerY, { align: 'center' });
+      pdf.text(this.formatCurrency(item.unitPrice), colPositions.unitPrice + 12, centerY, { align: 'center' });
       pdf.text(this.formatCurrency(item.total), colPositions.total, centerY, { align: 'right' });
       
       yPosition += rowHeight + 2;
@@ -207,10 +207,10 @@ export class PDFExporter {
 
     // Table bottom border
     pdf.setDrawColor(settings.borderColor);
-    pdf.setLineWidth(0.5);
+    pdf.setLineWidth(0.3);
     pdf.line(tableStartX, yPosition, tableEndX, yPosition);
 
-    return yPosition + 15;
+    return yPosition + 8;
   }
 
   static async exportQuotation(quotation: Quotation): Promise<void> {
@@ -284,22 +284,22 @@ export class PDFExporter {
       yPosition = this.addTemplateTable(pdf, template.settings, quotation.items, pageWidth, yPosition);
 
       // Totals section
-      checkPageBreak(50);
-      yPosition += 10;
+      checkPageBreak(40);
+      yPosition += 5;
       
       // Line before totals
       const tableStartX = 20;
       const tableEndX = pageWidth - 20;
       pdf.setDrawColor(template.settings.borderColor);
-      pdf.setLineWidth(0.5);
+      pdf.setLineWidth(0.3);
       pdf.line(tableStartX, yPosition, tableEndX, yPosition);
-      yPosition += 10;
+      yPosition += 5;
       
-      // Right-aligned totals with proper spacing
-      const totalsStartX = tableEndX - 100;
-      const lineHeight = 8;
+      // Right-aligned totals with compact spacing
+      const totalsStartX = tableEndX - 90;
+      const lineHeight = 6;
       
-      pdf.setFontSize(11);
+      pdf.setFontSize(10);
       pdf.setFont(bodyFont, 'normal');
       pdf.text('Subtotal:', totalsStartX, yPosition);
       pdf.text(this.formatCurrency(quotation.subtotal), tableEndX, yPosition, { align: 'right' });
@@ -313,12 +313,12 @@ export class PDFExporter {
 
       // Total line
       pdf.setDrawColor(template.settings.borderColor);
-      pdf.setLineWidth(0.8);
-      pdf.line(totalsStartX - 10, yPosition + 2, tableEndX, yPosition + 2);
+      pdf.setLineWidth(0.5);
+      pdf.line(totalsStartX - 5, yPosition + 2, tableEndX, yPosition + 2);
       yPosition += lineHeight;
 
       pdf.setFont(bodyFont, 'bold');
-      pdf.setFontSize(14);
+      pdf.setFontSize(12);
       pdf.text('Total:', totalsStartX, yPosition);
       pdf.text(this.formatCurrency(quotation.total), tableEndX, yPosition, { align: 'right' });
 
@@ -1033,10 +1033,7 @@ export class PDFExporter {
   }
 
   static formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
+    return `Rs ${amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
   }
 
   static formatDate(dateString: string): string {
