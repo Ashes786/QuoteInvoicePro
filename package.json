@@ -2,6 +2,8 @@
   "name": "nextjs_tailwind_shadcn_ts",
   "version": "0.1.0",
   "private": true,
+  "description": "A professional quotation and invoice management application",
+  "author": "QuoteInvoice Pro Team",
   "scripts": {
     "dev": "next dev -p 3000 2>&1 | tee dev.log",
     "build": "next build && cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/",
@@ -12,7 +14,11 @@
     "db:migrate": "prisma migrate dev",
     "db:reset": "prisma migrate reset",
     "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && electron .\"",
-    "electron:build": "NODE_ENV=production npm run build && electron-builder",
+    "electron:build": "NODE_ENV=production npm run build && electron-builder --publish=never",
+    "electron:build:win": "NODE_ENV=production npm run build && electron-builder --win --publish=never",
+    "electron:build:mac": "NODE_ENV=production npm run build && electron-builder --mac --publish=never", 
+    "electron:build:linux": "NODE_ENV=production npm run build && electron-builder --linux --publish=never",
+    "electron:build:all": "NODE_ENV=production npm run build && electron-builder --win --mac --linux --publish=never",
     "electron:pack": "NODE_ENV=production npm run build && electron-builder --dir"
   },
   "dependencies": {
@@ -58,8 +64,6 @@
     "cmdk": "^1.1.1",
     "concurrently": "^9.2.1",
     "date-fns": "^4.1.0",
-    "electron": "^33.4.11",
-    "electron-builder": "^25.1.8",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.23.2",
     "input-otp": "^1.4.2",
@@ -98,6 +102,8 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "electron": "^33.4.11",
+    "electron-builder": "^25.1.8",
     "eslint": "^9",
     "eslint-config-next": "15.3.5",
     "tailwindcss": "^4",
@@ -114,7 +120,6 @@
     "files": [
       ".next/standalone/**/*",
       "public/**/*",
-      "!public/electron.js",
       "!public/preload.js"
     ],
     "extraResources": [
@@ -126,6 +131,14 @@
         ]
       }
     ],
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "public/icon.ico",
+      "uninstallDisplayName": "QuoteInvoice Pro",
+      "license": "LICENSE",
+      "include": "public/installer.nsh"
+    },
     "mac": {
       "category": "public.app-category.productivity",
       "target": [
@@ -145,6 +158,12 @@
           "arch": [
             "x64",
             "ia32"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
           ]
         }
       ]

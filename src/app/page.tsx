@@ -7,6 +7,7 @@ import InvoiceManager from '@/components/InvoiceManager';
 import DocumentList from '@/components/DocumentList';
 import Reports from '@/components/Reports';
 import ItemsView from '@/components/ItemsView';
+import TemplatesView from '@/components/TemplatesView';
 import { Quotation } from '@/types';
 
 // Check if running in Electron
@@ -84,6 +85,8 @@ export default function Home() {
         return <Reports />;
       case 'items':
         return <ItemsView />;
+      case 'templates':
+        return <TemplatesView />;
       default:
         return (
           <QuotationForm

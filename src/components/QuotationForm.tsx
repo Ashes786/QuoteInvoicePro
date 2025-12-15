@@ -1,13 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Save, FileDown, Printer, Edit, Trash2, Palette } from 'lucide-react';
+import { Plus, Save, FileDown, Printer, Edit, Trash2, Search } from 'lucide-react';
 import { QuotationItem, Quotation } from '@/types';
 import { LocalStorage } from '@/lib/storage';
 import { PDFExporter } from '@/lib/pdf-export';
-import { TemplateStorage } from '@/lib/template-storage';
-import { DocumentTemplate } from '@/types/templates';
-import TemplateManager from './TemplateManager';
+import { CatalogItem } from '@/types/items';
+import { ItemCatalogStorage } from '@/lib/item-catalog-storage';
 
 interface QuotationFormProps {
   quotation?: Quotation;
@@ -25,23 +24,59 @@ export default function QuotationForm({ quotation, onSave, onCancel }: Quotation
     quotation?.items || [{ id: '1', name: '', quantity: 1, unitPrice: 0, total: 0 }]
   );
   const [taxRate, setTaxRate] = useState(quotation?.taxRate || 0);
-  const [templates, setTemplates] = useState<DocumentTemplate[]>([]);
-  const [activeTemplate, setActiveTemplate] = useState<DocumentTemplate | null>(null);
-  const [showTemplateManager, setShowTemplateManager] = useState(false);
+  const [catalogItems, setCatalogItems] = useState<CatalogItem[]>([]);
+  const [itemSuggestions, setItemSuggestions] = useState<CatalogItem[]>([]);
+  const [focusedItemIndex, setFocusedItemIndex] = useState<string | null>(null);
 
-  // Load templates on component mount
+  // Load catalog items on component mount
   useEffect(() => {
-    const loadedTemplates = TemplateStorage.getTemplates();
-    const defaultTemplates = TemplateStorage.getDefaultTemplates();
-    const allTemplates = [...loadedTemplates, ...defaultTemplates.filter(dt => !loadedTemplates.find(lt => lt.id === dt.id))];
-    setTemplates(allTemplates);
-    const active = TemplateStorage.getActiveTemplate() || defaultTemplates[0];
-    setActiveTemplate(active);
+    // Load catalog items
+    ItemCatalogStorage.initializeDefaultData();
+    setCatalogItems(ItemCatalogStorage.getCatalogItems());
   }, []);
 
-  const selectTemplate = (template: DocumentTemplate) => {
-    setActiveTemplate(template);
-    TemplateStorage.saveActiveTemplate(template);
+  const handleItemInputChange = (itemId: string, value: string) => {
+    // Update the item value
+    updateItem(itemId, 'name', value);
+    
+    // Show suggestions if value is not empty
+    if (value.trim().length > 0) {
+      const suggestions = catalogItems.filter(item => 
+        item.isActive && 
+        item.name.toLowerCase().includes(value.toLowerCase())
+      ).slice(0, 5); // Limit to 5 suggestions
+      setItemSuggestions(suggestions);
+      setFocusedItemIndex(itemId);
+    } else {
+      setItemSuggestions([]);
+      setFocusedItemIndex(null);
+    }
+  };
+
+  const selectSuggestion = (itemId: string, suggestion: CatalogItem) => {
+    // Update the item with suggestion data
+    setItems(
+      items.map(item => {
+        if (item.id === itemId) {
+          return {
+            ...item,
+            name: suggestion.name,
+            unitPrice: suggestion.unitPrice,
+            total: item.quantity * suggestion.unitPrice,
+          };
+        }
+        return item;
+      })
+    );
+    setItemSuggestions([]);
+    setFocusedItemIndex(null);
+  };
+
+  const hideSuggestions = () => {
+    setTimeout(() => {
+      setItemSuggestions([]);
+      setFocusedItemIndex(null);
+    }, 200); // Small delay to allow clicking on suggestions
   };
 
   const addItem = () => {
@@ -193,39 +228,6 @@ export default function QuotationForm({ quotation, onSave, onCancel }: Quotation
         </div>
       </div>
 
-      {/* Template Selector */}
-      <div className="bg-white rounded-lg shadow-lg p-4 mb-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <label className="text-sm font-medium text-gray-700">Template:</label>
-            <select
-              value={activeTemplate?.id || ''}
-              onChange={(e) => {
-                const template = templates.find(t => t.id === e.target.value);
-                if (template) selectTemplate(template);
-              }}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {templates.map((template) => (
-                <option key={template.id} value={template.id}>
-                  {template.name}
-                </option>
-              ))}
-            </select>
-            {activeTemplate && (
-              <span className="text-sm text-gray-500">{activeTemplate.description}</span>
-            )}
-          </div>
-          <button
-            onClick={() => setShowTemplateManager(true)}
-            className="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center space-x-2"
-          >
-            <Palette size={16} />
-            <span>Manage Templates</span>
-          </button>
-        </div>
-      </div>
-
       <div className="bg-white rounded-lg shadow-lg p-6">
         <div className="grid grid-cols-2 gap-6 mb-6">
           <div>
@@ -296,16 +298,54 @@ export default function QuotationForm({ quotation, onSave, onCancel }: Quotation
             {items.map((item, index) => (
               <div
                 key={item.id}
-                className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg bg-white"
+                className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg bg-white relative"
               >
                 <span className="font-medium text-gray-600 w-8">{index + 1}</span>
-                <input
-                  type="text"
-                  value={item.name}
-                  onChange={(e) => updateItem(item.id, 'name', e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Item name/description"
-                />
+                <div className="flex-1 relative">
+                  <input
+                    type="text"
+                    value={item.name}
+                    onChange={(e) => handleItemInputChange(item.id, e.target.value)}
+                    onBlur={hideSuggestions}
+                    onFocus={() => {
+                      if (item.name.trim().length > 0) {
+                        handleItemInputChange(item.id, item.name);
+                      }
+                    }}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Item name/description"
+                  />
+                  
+                  {/* Suggestions Dropdown */}
+                  {focusedItemIndex === item.id && itemSuggestions.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto">
+                      {itemSuggestions.map((suggestion) => (
+                        <div
+                          key={suggestion.id}
+                          onClick={() => selectSuggestion(item.id, suggestion)}
+                          className="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                        >
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="font-medium text-gray-900">{suggestion.name}</div>
+                              {suggestion.description && (
+                                <div className="text-sm text-gray-600 mt-1">{suggestion.description}</div>
+                              )}
+                              {suggestion.sku && (
+                                <div className="text-xs text-gray-500 mt-1">SKU: {suggestion.sku}</div>
+                              )}
+                            </div>
+                            <div className="text-right ml-4">
+                              <div className="font-semibold text-green-600">
+                                ${suggestion.unitPrice.toFixed(2)}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <input
                   type="number"
                   value={item.quantity}
@@ -360,16 +400,6 @@ export default function QuotationForm({ quotation, onSave, onCancel }: Quotation
         </div>
       </div>
 
-      {/* Template Manager Modal */}
-      {showTemplateManager && (
-        <TemplateManager
-          onClose={() => setShowTemplateManager(false)}
-          onSelectTemplate={(template) => {
-            selectTemplate(template);
-            setShowTemplateManager(false);
-          }}
-        />
-      )}
     </div>
   );
 }
