@@ -10,7 +10,10 @@
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
-    "db:reset": "prisma migrate reset"
+    "db:reset": "prisma migrate reset",
+    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && electron .\"",
+    "electron:build": "NODE_ENV=production npm run build && electron-builder",
+    "electron:pack": "NODE_ENV=production npm run build && electron-builder --dir"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -53,7 +56,10 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
+    "concurrently": "^9.2.1",
     "date-fns": "^4.1.0",
+    "electron": "^33.4.11",
+    "electron-builder": "^25.1.8",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.23.2",
     "input-otp": "^1.4.2",
@@ -80,6 +86,7 @@
     "tsx": "^4.20.3",
     "uuid": "^11.1.0",
     "vaul": "^1.1.2",
+    "wait-on": "^8.0.5",
     "z-ai-web-dev-sdk": "^0.0.10",
     "zod": "^4.0.2",
     "zustand": "^5.0.6"
@@ -96,5 +103,61 @@
     "tailwindcss": "^4",
     "tw-animate-css": "^1.3.5",
     "typescript": "^5"
+  },
+  "main": "public/electron.js",
+  "build": {
+    "appId": "com.quoteinvoicepro.app",
+    "productName": "QuoteInvoice Pro",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      ".next/standalone/**/*",
+      "public/**/*",
+      "!public/electron.js",
+      "!public/preload.js"
+    ],
+    "extraResources": [
+      {
+        "from": ".next/standalone",
+        "to": "app",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ]
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        }
+      ]
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    }
   }
 }

@@ -8,6 +8,7 @@ import {
   BarChart3,
   Building,
   Users,
+  Package,
   Menu, 
   X 
 } from 'lucide-react';
@@ -15,6 +16,10 @@ import CompanyProfileManager from './CompanyProfileManager';
 import CustomerManager from './CustomerManager';
 import { CompanyProfile } from '@/types/profile';
 import { ProfileStorage } from '@/lib/profile-storage';
+import { QuotationForm } from './QuotationForm';
+import { ItemCatalogManager } from './ItemCatalogManager';
+import { CatalogItem } from '@/types/items';
+import { ItemCatalogStorage } from '@/lib/item-catalog-storage';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -27,10 +32,17 @@ export default function Layout({ children, currentView, onViewChange }: LayoutPr
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
   const [showCustomerManager, setShowCustomerManager] = useState(false);
   const [companyProfile, setCompanyProfile] = useState<CompanyProfile | null>(null);
+  const [showItemCatalog, setShowItemCatalog] = useState(false);
+  const [catalogItems, setCatalogItems] = useState<CatalogItem[]>([]);
 
+  // Load catalog items on component mount
   useEffect(() => {
     const profile = ProfileStorage.getCompanyProfile();
     setCompanyProfile(profile);
+    
+    // Load catalog items
+    ItemCatalogStorage.initializeDefaultData();
+    setCatalogItems(ItemCatalogStorage.getCatalogItems());
   }, []);
 
   const menuItems = [
@@ -38,6 +50,7 @@ export default function Layout({ children, currentView, onViewChange }: LayoutPr
     { id: 'invoice', label: 'Invoice', icon: Receipt },
     { id: 'documents', label: 'Documents', icon: FolderOpen },
     { id: 'reports', label: 'Reports', icon: BarChart3 },
+    { id: 'items', label: 'Items', icon: Package },
   ];
 
   const handleCompanyProfileSave = (profile: CompanyProfile) => {

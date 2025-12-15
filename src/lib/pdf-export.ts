@@ -52,8 +52,11 @@ export class PDFExporter {
         } else if (settings.logoPosition === 'top-right') {
           logoX = pageWidth - 50;
         }
-        pdf.addImage(companyProfile.companyLogo, 'PNG', logoX, yPosition, 30, 30);
-        yPosition += 40;
+        
+        // Calculate proper image size and aspect ratio
+        const logoSize = 30; // Fixed logo size
+        pdf.addImage(companyProfile.companyLogo, 'PNG', logoX, yPosition, logoSize, logoSize);
+        yPosition += logoSize + 10; // Add proper spacing after logo
       } catch (error) {
         console.warn('Could not add company logo to PDF');
       }
@@ -70,9 +73,11 @@ export class PDFExporter {
         companyX = pageWidth - 80;
       }
       
+      const lineHeight = 6; // Consistent line height
+      
       if (companyProfile.companyName) {
         pdf.text(companyProfile.companyName, companyX, yPosition);
-        yPosition += 8;
+        yPosition += lineHeight;
       }
 
       pdf.setFontSize(10);
@@ -87,20 +92,20 @@ export class PDFExporter {
       
       addressParts.forEach(part => {
         pdf.text(part, companyX, yPosition);
-        yPosition += 5;
+        yPosition += lineHeight;
       });
-      yPosition += 5;
+      yPosition += lineHeight; // Extra space after address
 
       if (companyProfile.companyPhone || companyProfile.companyEmail) {
         if (companyProfile.companyPhone) {
           pdf.text(`Phone: ${companyProfile.companyPhone}`, companyX, yPosition);
-          yPosition += 5;
+          yPosition += lineHeight;
         }
         if (companyProfile.companyEmail) {
           pdf.text(`Email: ${companyProfile.companyEmail}`, companyX, yPosition);
-          yPosition += 5;
+          yPosition += lineHeight;
         }
-        yPosition += 5;
+        yPosition += lineHeight; // Extra space after contact info
       }
     }
 
@@ -128,28 +133,46 @@ export class PDFExporter {
 
   static addTemplateTable(pdf: jsPDF, settings: DocumentTemplateSettings, items: any[], pageWidth: number, yPosition: number): number {
     const { headerFont, bodyFont } = this.applyTemplateSettings(pdf, settings);
+    const tableStartX = 20;
+    const tableEndX = pageWidth - 20;
+    const tableWidth = tableEndX - tableStartX;
+    
+    // Define column widths
+    const colWidths = {
+      description: tableWidth * 0.5,      // 50% for description
+      quantity: tableWidth * 0.15,    // 15% for quantity
+      unitPrice: tableWidth * 0.2,    // 20% for unit price
+      total: tableWidth * 0.15        // 15% for total
+    };
+    
+    const colPositions = {
+      description: tableStartX,
+      quantity: tableStartX + colWidths.description,
+      unitPrice: tableStartX + colWidths.description + colWidths.quantity,
+      total: tableEndX
+    };
     
     // Add table header background if specified
     if (settings.tableStyle === 'striped' || settings.headerBackgroundColor !== '#ffffff') {
       pdf.setFillColor(settings.headerBackgroundColor);
-      pdf.rect(20, yPosition - 5, pageWidth - 40, 10, 'F');
+      pdf.rect(tableStartX, yPosition - 5, tableWidth, 10, 'F');
     }
 
     // Table headers
     pdf.setFont(headerFont, 'bold');
     pdf.setFontSize(11);
     pdf.setTextColor(settings.headerTextColor);
-    pdf.text('Item Description', 20, yPosition);
-    pdf.text('Quantity', 100, yPosition);
-    pdf.text('Unit Price', 130, yPosition);
-    pdf.text('Total', 160, yPosition, { align: 'right' });
-    yPosition += 5;
+    pdf.text('Item Description', colPositions.description, yPosition);
+    pdf.text('Quantity', colPositions.quantity, yPosition);
+    pdf.text('Unit Price', colPositions.unitPrice, yPosition);
+    pdf.text('Total', colPositions.total, yPosition, { align: 'right' });
+    yPosition += 8; // Consistent spacing after header
 
     // Table line
     pdf.setDrawColor(settings.borderColor);
     pdf.setLineWidth(0.3);
-    pdf.line(20, yPosition, pageWidth - 20, yPosition);
-    yPosition += 8;
+    pdf.line(tableStartX, yPosition, tableEndX, yPosition);
+    yPosition += 6; // Space between line and content
 
     // Table items
     pdf.setFont(bodyFont, 'normal');
@@ -160,25 +183,30 @@ export class PDFExporter {
       // Add alternating row background for striped style
       if (settings.tableStyle === 'striped' && index % 2 === 1) {
         pdf.setFillColor('#f9fafb');
-        pdf.rect(20, yPosition - 5, pageWidth - 40, 8, 'F');
+        pdf.rect(tableStartX, yPosition - 2, tableWidth, 12, 'F'); // Taller row background
       }
       
-      const lines = pdf.splitTextToSize(item.name, 70);
+      const lines = pdf.splitTextToSize(item.name, colWidths.description - 5);
       lines.forEach((line: string, lineIndex: number) => {
         if (lineIndex === 0) {
-          pdf.text(line, 20, yPosition);
-          pdf.text(item.quantity.toString(), 100, yPosition);
-          pdf.text(this.formatCurrency(item.unitPrice), 130, yPosition);
-          pdf.text(this.formatCurrency(item.total), 160, yPosition, { align: 'right' });
+          pdf.text(line, colPositions.description, yPosition);
+          pdf.text(item.quantity.toString(), colPositions.quantity, yPosition);
+          pdf.text(this.formatCurrency(item.unitPrice), colPositions.unitPrice, yPosition);
+          pdf.text(this.formatCurrency(item.total), colPositions.total, yPosition, { align: 'right' });
         } else {
-          pdf.text(line, 20, yPosition);
+          pdf.text(line, colPositions.description, yPosition);
         }
-        yPosition += 5;
+        yPosition += 5; // Consistent line spacing
       });
-      yPosition += 3;
+      yPosition += 4; // Space between items
     });
 
-    return yPosition;
+    // Add table bottom border
+    pdf.setDrawColor(settings.borderColor);
+    pdf.setLineWidth(0.3);
+    pdf.line(tableStartX, yPosition, tableEndX, yPosition);
+
+    return yPosition + 10;
   }
 
   static async exportQuotation(quotation: Quotation): Promise<void> {
@@ -252,39 +280,43 @@ export class PDFExporter {
       yPosition = this.addTemplateTable(pdf, template.settings, quotation.items, pageWidth, yPosition);
 
       // Totals section
-      checkPageBreak(40);
-      yPosition += 10;
+      checkPageBreak(30); // Reduced from 40 to 30
+      yPosition += 5; // Reduced from 10 to 5
       
       // Line before totals
+      const tableStartX = 20;
+      const tableEndX = pageWidth - 20;
       pdf.setDrawColor(template.settings.borderColor);
       pdf.setLineWidth(0.3);
-      pdf.line(20, yPosition, pageWidth - 20, yPosition);
-      yPosition += 10;
-
-      // Right-aligned totals
-      const totalsX = pageWidth - 60;
+      pdf.line(tableStartX, yPosition, tableEndX, yPosition);
+      yPosition += 4; // Reduced from 8 to 4
+      
+      // Right-aligned totals with proper spacing
+      const totalsStartX = tableEndX - 80;
+      const lineHeight = 5; // Reduced from 7 to 5
+      
       pdf.setFontSize(11);
       pdf.setFont(bodyFont, 'normal');
-      pdf.text('Subtotal:', totalsX, yPosition);
-      pdf.text(this.formatCurrency(quotation.subtotal), pageWidth - 20, yPosition, { align: 'right' });
-      yPosition += 8;
+      pdf.text('Subtotal:', totalsStartX, yPosition);
+      pdf.text(this.formatCurrency(quotation.subtotal), tableEndX, yPosition, { align: 'right' });
+      yPosition += lineHeight;
 
       if (quotation.taxRate && quotation.taxAmount) {
-        pdf.text(`Tax (${quotation.taxRate}%):`, totalsX, yPosition);
-        pdf.text(this.formatCurrency(quotation.taxAmount), pageWidth - 20, yPosition, { align: 'right' });
-        yPosition += 8;
+        pdf.text(`Tax (${quotation.taxRate}%):`, totalsStartX, yPosition);
+        pdf.text(this.formatCurrency(quotation.taxAmount), tableEndX, yPosition, { align: 'right' });
+        yPosition += lineHeight;
       }
 
       // Total line
       pdf.setDrawColor(template.settings.borderColor);
       pdf.setLineWidth(0.5);
-      pdf.line(totalsX - 5, yPosition, pageWidth - 15, yPosition);
-      yPosition += 8;
+      pdf.line(totalsStartX - 5, yPosition, tableEndX, yPosition);
+      yPosition += lineHeight; // Reduced from lineHeight + 2 to just lineHeight
 
       pdf.setFont(bodyFont, 'bold');
       pdf.setFontSize(12);
-      pdf.text('Total:', totalsX, yPosition);
-      pdf.text(this.formatCurrency(quotation.total), pageWidth - 20, yPosition, { align: 'right' });
+      pdf.text('Total:', totalsStartX, yPosition);
+      pdf.text(this.formatCurrency(quotation.total), tableEndX, yPosition, { align: 'right' });
 
       // Add payment terms if available
       if (template.settings.showTerms && companyProfile?.paymentTerms) {
@@ -293,12 +325,12 @@ export class PDFExporter {
         pdf.setFont(bodyFont, 'bold');
         pdf.setFontSize(10);
         pdf.text('Payment Terms:', 20, yPosition);
-        yPosition += 5;
+        yPosition += 6; // Consistent spacing
         pdf.setFont(bodyFont, 'normal');
         const termsLines = pdf.splitTextToSize(companyProfile.paymentTerms, pageWidth - 40);
         termsLines.forEach((line: string) => {
           pdf.text(line, 20, yPosition);
-          yPosition += 5;
+          yPosition += 5; // Consistent line spacing
         });
       }
 
@@ -309,12 +341,12 @@ export class PDFExporter {
         pdf.setFont(bodyFont, 'bold');
         pdf.setFontSize(10);
         pdf.text('Notes:', 20, yPosition);
-        yPosition += 5;
+        yPosition += 6; // Consistent spacing
         pdf.setFont(bodyFont, 'normal');
         const notesLines = pdf.splitTextToSize(companyProfile.notes, pageWidth - 40);
         notesLines.forEach((line: string) => {
           pdf.text(line, 20, yPosition);
-          yPosition += 5;
+          yPosition += 5; // Consistent line spacing
         });
       }
 
@@ -367,36 +399,37 @@ export class PDFExporter {
       checkPageBreak(50);
       const { bodyFont } = this.applyTemplateSettings(pdf, template.settings);
       pdf.setFontSize(12);
+      const lineHeight = 6; // Consistent line height
       
       // Left column - Bill To
       if (template.settings.showCustomerInfo) {
         pdf.setFont(bodyFont, 'bold');
         pdf.text('Bill To:', 20, yPosition);
-        yPosition += 7;
+        yPosition += lineHeight;
         pdf.setFont(bodyFont, 'bold');
         pdf.setFontSize(14);
         pdf.text(invoice.customerName, 20, yPosition);
-        yPosition += 6;
+        yPosition += lineHeight;
         pdf.setFont(bodyFont, 'normal');
         pdf.setFontSize(11);
         pdf.text(invoice.customerContact, 20, yPosition);
-        yPosition += 10;
+        yPosition += lineHeight; // Reduced from lineHeight + 4 to just lineHeight
       }
 
       // Right column - Invoice Details
-      let rightColumnY = yPosition - 33;
+      let rightColumnY = yPosition - 25;
       pdf.setFont(bodyFont, 'bold');
       pdf.setFontSize(12);
       pdf.text('Invoice Details:', pageWidth - 80, rightColumnY);
-      rightColumnY += 7;
+      rightColumnY += lineHeight;
       pdf.setFont(bodyFont, 'normal');
       pdf.text(`Invoice #: ${invoice.invoiceNumber}`, pageWidth - 80, rightColumnY);
-      rightColumnY += 6;
+      rightColumnY += lineHeight;
       pdf.text(`Date: ${this.formatDate(invoice.invoiceDate)}`, pageWidth - 80, rightColumnY);
-      rightColumnY += 6;
+      rightColumnY += lineHeight;
       if (template.settings.showDueDate && invoice.dueDate) {
         pdf.text(`Due Date: ${this.formatDate(invoice.dueDate)}`, pageWidth - 80, rightColumnY);
-        rightColumnY += 6;
+        rightColumnY += lineHeight;
       }
       pdf.text(`Status: ${invoice.status.toUpperCase()}`, pageWidth - 80, rightColumnY);
       yPosition += 10;

@@ -1,15 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Save, FileDown, Printer, Edit, Trash2, Palette, Package } from 'lucide-react';
+import { Plus, Save, FileDown, Printer, Edit, Trash2, Palette } from 'lucide-react';
 import { QuotationItem, Quotation } from '@/types';
 import { LocalStorage } from '@/lib/storage';
 import { PDFExporter } from '@/lib/pdf-export';
 import { TemplateStorage } from '@/lib/template-storage';
 import { DocumentTemplate } from '@/types/templates';
 import TemplateManager from './TemplateManager';
-import ItemCatalogManager from './ItemCatalogManager';
-import { CatalogItem } from '@/types/items';
 
 interface QuotationFormProps {
   quotation?: Quotation;
@@ -30,7 +28,6 @@ export default function QuotationForm({ quotation, onSave, onCancel }: Quotation
   const [templates, setTemplates] = useState<DocumentTemplate[]>([]);
   const [activeTemplate, setActiveTemplate] = useState<DocumentTemplate | null>(null);
   const [showTemplateManager, setShowTemplateManager] = useState(false);
-  const [showItemCatalog, setShowItemCatalog] = useState(false);
 
   // Load templates on component mount
   useEffect(() => {
@@ -45,17 +42,6 @@ export default function QuotationForm({ quotation, onSave, onCancel }: Quotation
   const selectTemplate = (template: DocumentTemplate) => {
     setActiveTemplate(template);
     TemplateStorage.saveActiveTemplate(template);
-  };
-
-  const selectItemFromCatalog = (catalogItem: CatalogItem) => {
-    const newItem: QuotationItem = {
-      id: Date.now().toString(),
-      name: catalogItem.name,
-      quantity: 1,
-      unitPrice: catalogItem.unitPrice,
-      total: catalogItem.unitPrice,
-    };
-    setItems([...items, newItem]);
   };
 
   const addItem = () => {
@@ -296,29 +282,21 @@ export default function QuotationForm({ quotation, onSave, onCancel }: Quotation
         <div className="mb-6">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold text-gray-800">Items</h3>
-            <div className="flex space-x-2">
-              <button
-                onClick={() => setShowItemCatalog(true)}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center space-x-2"
-              >
-                <Package size={16} />
-                <span>Item Catalog</span>
-              </button>
-              <button
-                onClick={addItem}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
-              >
-                <Plus size={16} />
-                <span>Add Item</span>
-              </button>
-            </div>
+            <button
+              onClick={addItem}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+            >
+              <Plus size={16} />
+              <span>Add Item</span>
+            </button>
           </div>
 
+          {/* Items List */}
           <div className="space-y-4">
             {items.map((item, index) => (
               <div
                 key={item.id}
-                className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg"
+                className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg bg-white"
               >
                 <span className="font-medium text-gray-600 w-8">{index + 1}</span>
                 <input
@@ -389,17 +367,6 @@ export default function QuotationForm({ quotation, onSave, onCancel }: Quotation
           onSelectTemplate={(template) => {
             selectTemplate(template);
             setShowTemplateManager(false);
-          }}
-        />
-      )}
-
-      {/* Item Catalog Modal */}
-      {showItemCatalog && (
-        <ItemCatalogManager
-          onClose={() => setShowItemCatalog(false)}
-          onSelectItem={(catalogItem) => {
-            selectItemFromCatalog(catalogItem);
-            setShowItemCatalog(false);
           }}
         />
       )}
