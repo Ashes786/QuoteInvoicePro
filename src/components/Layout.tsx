@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   FileText, 
   Receipt, 
@@ -28,7 +28,7 @@ export default function Layout({ children, currentView, onViewChange }: LayoutPr
   const [showCustomerManager, setShowCustomerManager] = useState(false);
   const [companyProfile, setCompanyProfile] = useState<CompanyProfile | null>(null);
 
-  useState(() => {
+  useEffect(() => {
     const profile = ProfileStorage.getCompanyProfile();
     setCompanyProfile(profile);
   }, []);

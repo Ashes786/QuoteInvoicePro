@@ -61,6 +61,9 @@ export class TemplateStorage {
           footerLayout: 'detailed',
           logoPosition: 'top-left',
           companyInfoPosition: 'right',
+          paperSize: 'a4',
+          orientation: 'portrait',
+          margins: { top: 20, right: 20, bottom: 20, left: 20 },
           primaryColor: '#1a1a1a',
           secondaryColor: '#64748b',
           accentColor: '#3b82f6',
@@ -76,9 +79,6 @@ export class TemplateStorage {
           showWatermark: false,
           watermarkText: '',
           showPageNumbers: true,
-          paperSize: 'a4',
-          orientation: 'portrait',
-          margins: { top: 20, right: 20, bottom: 20, left: 20 },
           showLogo: true,
           showCompanyInfo: true,
           showCustomerInfo: true,
@@ -91,7 +91,9 @@ export class TemplateStorage {
           showNotes: true,
           showCustomFields: false,
           customFields: []
-        }
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       },
       {
         id: 'classic-professional',
@@ -103,6 +105,9 @@ export class TemplateStorage {
           footerLayout: 'simple',
           logoPosition: 'top-center',
           companyInfoPosition: 'left',
+          paperSize: 'a4',
+          orientation: 'portrait',
+          margins: { top: 25, right: 25, bottom: 25, left: 25 },
           primaryColor: '#1f2937',
           secondaryColor: '#374151',
           accentColor: '#dc2626',
@@ -118,9 +123,6 @@ export class TemplateStorage {
           showWatermark: true,
           watermarkText: 'DRAFT',
           showPageNumbers: true,
-          paperSize: 'a4',
-          orientation: 'portrait',
-          margins: { top: 25, right: 25, bottom: 25, left: 25 },
           showLogo: true,
           showCompanyInfo: true,
           showCustomerInfo: true,
@@ -133,7 +135,9 @@ export class TemplateStorage {
           showNotes: true,
           showCustomFields: false,
           customFields: []
-        }
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       },
       {
         id: 'minimal-clean',
@@ -145,6 +149,9 @@ export class TemplateStorage {
           footerLayout: 'none',
           logoPosition: 'none',
           companyInfoPosition: 'hidden',
+          paperSize: 'a4',
+          orientation: 'portrait',
+          margins: { top: 15, right: 15, bottom: 15, left: 15 },
           primaryColor: '#000000',
           secondaryColor: '#666666',
           accentColor: '#999999',
@@ -160,9 +167,6 @@ export class TemplateStorage {
           showWatermark: false,
           watermarkText: '',
           showPageNumbers: false,
-          paperSize: 'a4',
-          orientation: 'portrait',
-          margins: { top: 15, right: 15, bottom: 15, left: 15 },
           showLogo: false,
           showCompanyInfo: false,
           showCustomerInfo: true,
@@ -175,7 +179,9 @@ export class TemplateStorage {
           showNotes: false,
           showCustomFields: false,
           customFields: []
-        }
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       },
       {
         id: 'creative-modern',
@@ -187,6 +193,9 @@ export class TemplateStorage {
           footerLayout: 'detailed',
           logoPosition: 'top-right',
           companyInfoPosition: 'left',
+          paperSize: 'a4',
+          orientation: 'portrait',
+          margins: { top: 30, right: 30, bottom: 30, left: 30 },
           primaryColor: '#6366f1',
           secondaryColor: '#a78bfa',
           accentColor: '#f59e0b',
@@ -202,9 +211,6 @@ export class TemplateStorage {
           showWatermark: false,
           watermarkText: '',
           showPageNumbers: true,
-          paperSize: 'a4',
-          orientation: 'portrait',
-          margins: { top: 30, right: 30, bottom: 30, left: 30 },
           showLogo: true,
           showCompanyInfo: true,
           showCustomerInfo: true,
@@ -236,7 +242,9 @@ export class TemplateStorage {
               order: 2
             }
           ]
-        }
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       }
     ];
   }

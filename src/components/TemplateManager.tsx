@@ -30,7 +30,7 @@ export default function TemplateManager({ onClose, onSelectTemplate }: TemplateM
       name: 'New Template',
       description: 'Custom template',
       isDefault: false,
-      settings: TemplateStorage.getDefaultTemplates()[0].settings, // Use modern settings as base
+      settings: TemplateStorage.getDefaultTemplates()[0].settings,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -84,11 +84,13 @@ export default function TemplateManager({ onClose, onSelectTemplate }: TemplateM
 
   const resetToDefault = () => {
     const defaultTemplate = TemplateStorage.getDefaultTemplates()[0];
-    const resetTemplate = {
-      ...editingTemplate,
-      settings: defaultTemplate.settings
-    };
-    setEditingTemplate(resetTemplate);
+    if (editingTemplate) {
+      const resetTemplate: DocumentTemplate = {
+        ...editingTemplate,
+        settings: defaultTemplate.settings
+      };
+      setEditingTemplate(resetTemplate);
+    }
   };
 
   if (editingTemplate) {
@@ -232,7 +234,6 @@ export default function TemplateManager({ onClose, onSelectTemplate }: TemplateM
                     <option value="right">Right</option>
                   </select>
                 </div>
-              </div>
 
                 {/* Colors */}
                 <div>
@@ -300,7 +301,6 @@ export default function TemplateManager({ onClose, onSelectTemplate }: TemplateM
                     className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg"
                   />
                 </div>
-              </div>
 
                 {/* Header Background */}
                 <div>
@@ -323,13 +323,11 @@ export default function TemplateManager({ onClose, onSelectTemplate }: TemplateM
                     className="w-full h-10 px-3 py-2 border border-gray-300 rounded-lg"
                   />
                 </div>
-              </div>
-            </div>
 
-            {/* Typography */}
-            <div>
-              <h4 className="font-medium text-gray-800 mb-3">Typography</h4>
-              <div className="grid grid-cols-2 gap-4">
+                {/* Typography */}
+                <div>
+                  <h4 className="font-medium text-gray-800 mb-3">Typography</h4>
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Header Font</label>
                       <select
@@ -360,40 +358,13 @@ export default function TemplateManager({ onClose, onSelectTemplate }: TemplateM
                         <option value="Verdana">Verdana</option>
                       </select>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Font Size</label>
-                      <select
-                        value={editingTemplate.settings.fontSize}
-                        onChange={(e) => updateTemplateSettings({ fontSize: e.target.value as any })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="small">Small</option>
-                        <option value="medium">Medium</option>
-                        <option value="large">Large</option>
-                      </select>
-                    </div>
                   </div>
                 </div>
 
-            {/* Table Style */}
-            <div>
-              <h4 className="font-medium text-gray-800 mb-3">Table Style</h4>
-              <select
-                value={editingTemplate.settings.tableStyle}
-                onChange={(e) => updateTemplateSettings({ tableStyle: e.target.value as any })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="borders">Borders</option>
-                <option value="striped">Striped</option>
-                <option value="minimal">Minimal</option>
-              </select>
-              </div>
-            </div>
-
-            {/* Paper Settings */}
-            <div>
-              <h4 className="font-medium text-gray-800 mb-3">Paper Settings</h4>
-              <div className="grid grid-cols-2 gap-4">
+                {/* Paper Settings */}
+                <div>
+                  <h4 className="font-medium text-gray-800 mb-3">Paper Settings</h4>
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Paper Size</label>
                       <select
@@ -419,216 +390,10 @@ export default function TemplateManager({ onClose, onSelectTemplate }: TemplateM
                     </div>
                   </div>
                 </div>
-
-                {/* Margins */}
-                <div>
-                  <h4 className="font-medium text-gray-800 mb-3">Margins (px)</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Top</label>
-                      <input
-                        type="number"
-                        value={editingTemplate.settings.margins.top}
-                        onChange={(e) => updateTemplateSettings({ 
-                          margins: { ...editingTemplate.settings.margins, top: parseInt(e.target.value) || 0 }
-                        })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Right</label>
-                      <input
-                        type="number"
-                        value={editingTemplate.settings.margins.right}
-                        onChange={(e) => updateTemplateSettings({ 
-                          margins: { ...editingTemplate.settings.margins, right: parseInt(e.target.value) || 0 }
-                        })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Bottom</label>
-                      <input
-                        type="number"
-                        value={editingTemplate.settings.margins.bottom}
-                        onChange={(e) => updateTemplateSettings({ 
-                          margins: { ...editingTemplate.settings.margins, bottom: parseInt(e.target.value) || 0 }
-                        })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Left</label>
-                      <input
-                        type="number"
-                        value={editingTemplate.settings.margins.left}
-                        onChange={(e) => updateTemplateSettings({ 
-                          margins: { ...editingTemplate.settings.margins, left: parseInt(e.target.value) || 0 }
-                        })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                  </div>
-                </div>
               </div>
-            </div>
-
-            {/* Footer Settings */}
-            <div>
-              <h4 className="font-medium text-gray-800 mb-3">Footer Options</h4>
-              <div className="space-y-2">
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={editingTemplate.settings.showWatermark}
-                    onChange={(e) => updateTemplateSettings({ showWatermark: e.target.checked })}
-                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                  />
-                  <span className="text-sm text-gray-700">Show Watermark</span>
-                </label>
-                {editingTemplate.settings.showWatermark && (
-                  <input
-                    type="text"
-                    value={editingTemplate.settings.watermarkText}
-                    onChange={(e) => updateTemplateSettings({ watermarkText: e.target.value })}
-                    placeholder="Enter watermark text"
-                    className="ml-2 flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                )}
-              </div>
-
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={editingTemplate.settings.showPageNumbers}
-                    onChange={(e) => updateTemplateSettings({ showPageNumbers: e.target.checked })}
-                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                  />
-                  <span className="text-sm text-gray-700">Show Page Numbers</span>
-                </label>
-              </div>
-            </div>
-          </div>
-
-            {/* Field Visibility */}
-            <div>
-              <h4 className="font-medium text-gray-800 mb-3">Field Visibility</h4>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={editingTemplate.settings.showLogo}
-                      onChange={(e) => updateTemplateSettings({ showLogo: e.target.checked })}
-                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">Show Logo</span>
-                  </label>
-                </div>
-                <label className="flex items-center space-x-2">
-                  <input
-                      type="checkbox"
-                      checked={editingTemplate.settings.showCompanyInfo}
-                      onChange={(e) => updateTemplateSettings({ showCompanyInfo: e.target.checked })}
-                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">Show Company Info</span>
-                  </label>
-                </div>
-                <label className="flex items-center space-x-2">
-                  <input
-                      type="checkbox"
-                      checked={editingTemplate.settings.showCustomerInfo}
-                      onChange={(e) => updateTemplateSettings({ showCustomerInfo: e.target.checked })}
-                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">Show Customer Info</span>
-                  </label>
-                </div>
-                <label className="flex items-center space-x-2">
-                  <input
-                      type="checkbox"
-                      checked={editingTemplate.settings.showPaymentInfo}
-                      onChange={(e) => updateTemplateSettings({ showPaymentInfo: e.target.checked })}
-                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">Show Payment Info</span>
-                  </label>
-                </div>
-                <label className="flex items-center space-x-2">
-                  <input
-                      type="checkbox"
-                      checked={editingTemplate.settings.showTaxId}
-                      onChange={(e) => updateTemplateSettings({ showTaxId: e.target.checked })}
-                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">Show Tax ID</span>
-                  </label>
-                </div>
-                <label className="flex items-center space-x-2">
-                  <input
-                      type="checkbox"
-                      checked={editingTemplate.settings.showRegistrationNumber}
-                      onChange={(e) => updateTemplateSettings({ showRegistrationNumber: e.target.checked })}
-                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">Show Registration Number</span>
-                  </label>
-                </div>
-                <label className="flex items-center space-x-2">
-                  <input
-                      type="checkbox"
-                      checked={editingTemplate.settings.showDueDate}
-                      onChange={(e) => updateTemplateSettings({ showDueDate: e.target.checked })}
-                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">Show Due Date</span>
-                  </label>
-                </div>
-                <label className="flex items-center space-x-2">
-                  <input
-                      type="checkbox"
-                      checked={editingTemplate.settings.showBankInfo}
-                      onChange={(e) => updateTemplateSettings({ showBankInfo: e.target.checked })}
-                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">Show Bank Info</span>
-                  </label>
-                </div>
-                <label className="flex items-center space-x-2">
-                  <input
-                      type="checkbox"
-                      checked={editingTemplate.settings.showTerms}
-                      onChange={(e) => updateTemplateSettings({ showTerms: e.target.checked })}
-                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">Show Terms</span>
-                  </label>
-                </div>
-                <label className="flex items-center space-x-2">
-                  <input
-                      type="checkbox"
-                      checked={editingTemplate.settings.showNotes}
-                      onChange={(e) => updateTemplateSettings({ showNotes: e.target.checked })}
-                      className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">Show Notes</span>
-                  </label>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
-      </div>
-
-      <button
-        onClick={() => setShowSettings(false)}
-        className="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-      >
-        Close Settings
-      </button>
-    )}
-  </div>
       </div>
     );
   }
@@ -638,17 +403,17 @@ export default function TemplateManager({ onClose, onSelectTemplate }: TemplateM
       <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-y-auto m-4">
         <div className="flex justify-between items-center p-6 border-b">
           <h2 className="text-2xl font-bold text-gray-800">Template Manager</h2>
-          <div className="flex space-x-2">
-            <button
-              onClick={() => {
-                setEditingTemplate(null);
-                setIsCreating(false);
-                onClose();
-              }}
-              className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
-            >
-              <X size={24} />
-            </button>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <X size={24} />
+          </button>
+        </div>
+
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-lg font-semibold text-gray-800">Templates</h3>
             <button
               onClick={createNewTemplate}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
@@ -657,61 +422,57 @@ export default function TemplateManager({ onClose, onSelectTemplate }: TemplateM
               <span>Create Template</span>
             </button>
           </div>
-        </div>
 
-        <div className="p-6">
-          <div className="mb-6">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-gray-800">Templates</h3>
-              <button
-                onClick={() => setActiveTemplate(null)}
-                className="text-sm text-blue-600 hover:text-blue-800 underline"
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {templates.map((template) => (
+              <div
+                key={template.id}
+                className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                  activeTemplate?.id === template.id
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+                onClick={() => selectTemplate(template)}
               >
-                Clear Selection
-              </button>
-            </div>
-          </div>
-
-          {templates.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">No templates found</p>
-              <p className="text-gray-400 mt-2">Create your first template to get started</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {templates.map((template) => (
-                <div
-                  key={template.id}
-                  onClick={() => selectTemplate(template)}
-                  className={`p-4 border rounded-lg cursor-pointer transition-all hover:shadow-md hover:scale-105 ${
-                    activeTemplate?.id === template.id
-                      ? 'ring-2 ring-blue-500 bg-blue-50'
-                      : 'hover:bg-gray-50 hover:border-gray-300'
-                  }`}
-                >
-                  <div className="flex flex-col items-center justify-between mb-2">
-                    <h4 className="font-medium text-gray-900">{template.name}</h4>
-                    <div className="text-xs text-gray-500">{template.description}</div>
-                  </div>
+                <div className="flex justify-between items-start mb-2">
+                  <h4 className="font-semibold text-gray-800">{template.name}</h4>
+                  {template.isDefault && (
+                    <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                      Default
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-gray-600 mb-4">{template.description}</p>
+                <div className="flex justify-between items-center">
                   <div className="flex space-x-2">
                     <button
-                      onClick={() => editTemplate(template)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        editTemplate(template);
+                      }}
                       className="text-blue-600 hover:text-blue-800"
                     >
-                      <Eye size={16} />
+                      Edit
                     </button>
-                    <button
-                      onClick={() => deleteTemplate(template.id)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                    {!template.isDefault && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteTemplate(template.id);
+                        }}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        Delete
+                      </button>
+                    )}
                   </div>
-                  </div>
+                  {activeTemplate?.id === template.id && (
+                    <span className="text-green-600 text-sm font-medium">Active</span>
+                  )}
                 </div>
-              ))}
-            </div>
-          )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

@@ -15,6 +15,16 @@ export interface DocumentTemplateSettings {
   logoPosition: 'top-left' | 'top-center' | 'top-right' | 'none';
   companyInfoPosition: 'left' | 'right' | 'hidden';
   
+  // Document settings
+  paperSize: 'a4' | 'letter' | 'legal';
+  orientation: 'portrait' | 'landscape';
+  margins: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
+  
   // Colors
   primaryColor: string;
   secondaryColor: string;

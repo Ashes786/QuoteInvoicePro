@@ -1,10 +1,15 @@
 'use client';
 
-import { useState } from 'react';
-import { Plus, Save, FileDown, Printer, Edit, Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, Save, FileDown, Printer, Edit, Trash2, Palette, Package } from 'lucide-react';
 import { QuotationItem, Quotation } from '@/types';
 import { LocalStorage } from '@/lib/storage';
 import { PDFExporter } from '@/lib/pdf-export';
+import { TemplateStorage } from '@/lib/template-storage';
+import { DocumentTemplate } from '@/types/templates';
+import TemplateManager from './TemplateManager';
+import ItemCatalogManager from './ItemCatalogManager';
+import { CatalogItem } from '@/types/items';
 
 interface QuotationFormProps {
   quotation?: Quotation;
@@ -22,6 +27,36 @@ export default function QuotationForm({ quotation, onSave, onCancel }: Quotation
     quotation?.items || [{ id: '1', name: '', quantity: 1, unitPrice: 0, total: 0 }]
   );
   const [taxRate, setTaxRate] = useState(quotation?.taxRate || 0);
+  const [templates, setTemplates] = useState<DocumentTemplate[]>([]);
+  const [activeTemplate, setActiveTemplate] = useState<DocumentTemplate | null>(null);
+  const [showTemplateManager, setShowTemplateManager] = useState(false);
+  const [showItemCatalog, setShowItemCatalog] = useState(false);
+
+  // Load templates on component mount
+  useEffect(() => {
+    const loadedTemplates = TemplateStorage.getTemplates();
+    const defaultTemplates = TemplateStorage.getDefaultTemplates();
+    const allTemplates = [...loadedTemplates, ...defaultTemplates.filter(dt => !loadedTemplates.find(lt => lt.id === dt.id))];
+    setTemplates(allTemplates);
+    const active = TemplateStorage.getActiveTemplate() || defaultTemplates[0];
+    setActiveTemplate(active);
+  }, []);
+
+  const selectTemplate = (template: DocumentTemplate) => {
+    setActiveTemplate(template);
+    TemplateStorage.saveActiveTemplate(template);
+  };
+
+  const selectItemFromCatalog = (catalogItem: CatalogItem) => {
+    const newItem: QuotationItem = {
+      id: Date.now().toString(),
+      name: catalogItem.name,
+      quantity: 1,
+      unitPrice: catalogItem.unitPrice,
+      total: catalogItem.unitPrice,
+    };
+    setItems([...items, newItem]);
+  };
 
   const addItem = () => {
     const newItem: QuotationItem = {
@@ -172,6 +207,39 @@ export default function QuotationForm({ quotation, onSave, onCancel }: Quotation
         </div>
       </div>
 
+      {/* Template Selector */}
+      <div className="bg-white rounded-lg shadow-lg p-4 mb-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <label className="text-sm font-medium text-gray-700">Template:</label>
+            <select
+              value={activeTemplate?.id || ''}
+              onChange={(e) => {
+                const template = templates.find(t => t.id === e.target.value);
+                if (template) selectTemplate(template);
+              }}
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {templates.map((template) => (
+                <option key={template.id} value={template.id}>
+                  {template.name}
+                </option>
+              ))}
+            </select>
+            {activeTemplate && (
+              <span className="text-sm text-gray-500">{activeTemplate.description}</span>
+            )}
+          </div>
+          <button
+            onClick={() => setShowTemplateManager(true)}
+            className="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center space-x-2"
+          >
+            <Palette size={16} />
+            <span>Manage Templates</span>
+          </button>
+        </div>
+      </div>
+
       <div className="bg-white rounded-lg shadow-lg p-6">
         <div className="grid grid-cols-2 gap-6 mb-6">
           <div>
@@ -228,13 +296,22 @@ export default function QuotationForm({ quotation, onSave, onCancel }: Quotation
         <div className="mb-6">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold text-gray-800">Items</h3>
-            <button
-              onClick={addItem}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
-            >
-              <Plus size={16} />
-              <span>Add Item</span>
-            </button>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => setShowItemCatalog(true)}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center space-x-2"
+              >
+                <Package size={16} />
+                <span>Item Catalog</span>
+              </button>
+              <button
+                onClick={addItem}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+              >
+                <Plus size={16} />
+                <span>Add Item</span>
+              </button>
+            </div>
           </div>
 
           <div className="space-y-4">
@@ -304,6 +381,28 @@ export default function QuotationForm({ quotation, onSave, onCancel }: Quotation
           </div>
         </div>
       </div>
+
+      {/* Template Manager Modal */}
+      {showTemplateManager && (
+        <TemplateManager
+          onClose={() => setShowTemplateManager(false)}
+          onSelectTemplate={(template) => {
+            selectTemplate(template);
+            setShowTemplateManager(false);
+          }}
+        />
+      )}
+
+      {/* Item Catalog Modal */}
+      {showItemCatalog && (
+        <ItemCatalogManager
+          onClose={() => setShowItemCatalog(false)}
+          onSelectItem={(catalogItem) => {
+            selectItemFromCatalog(catalogItem);
+            setShowItemCatalog(false);
+          }}
+        />
+      )}
     </div>
   );
 }

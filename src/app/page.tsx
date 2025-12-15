@@ -10,15 +10,15 @@ import { Quotation } from '@/types';
 
 export default function Home() {
   const [currentView, setCurrentView] = useState('quotation');
-  const [editingQuotation, setEditingQuotation] = useState<Quotation | null>(null);
+  const [editingQuotation, setEditingQuotation] = useState<Quotation | undefined>(undefined);
 
   const handleQuotationSave = (quotation: Quotation) => {
-    setEditingQuotation(null);
+    setEditingQuotation(undefined);
     setCurrentView('documents');
   };
 
   const handleQuotationCancel = () => {
-    setEditingQuotation(null);
+    setEditingQuotation(undefined);
     setCurrentView('documents');
   };
 
