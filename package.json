@@ -1,5 +1,6 @@
 {
   "name": "nextjs_tailwind_shadcn_ts",
+  "productName": "QuoteInvoice Pro",
   "version": "0.1.0",
   "private": true,
   "description": "A professional quotation and invoice management application",
@@ -15,8 +16,8 @@
     "db:reset": "prisma migrate reset",
     "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && electron .\"",
     "electron:build": "NODE_ENV=production npm run build && electron-builder --publish=never",
-    "electron:build:win": "NODE_ENV=production npm run build && electron-builder --win --publish=never",
-    "electron:build:mac": "NODE_ENV=production npm run build && electron-builder --mac --publish=never", 
+    "electron:build:win": "cross-env NODE_ENV=production npm run build && electron-builder --win --publish=never",
+    "electron:build:mac": "NODE_ENV=production npm run build && electron-builder --mac --publish=never",
     "electron:build:linux": "NODE_ENV=production npm run build && electron-builder --linux --publish=never",
     "electron:build:all": "NODE_ENV=production npm run build && electron-builder --win --mac --linux --publish=never",
     "electron:pack": "NODE_ENV=production npm run build && electron-builder --dir"
@@ -102,6 +103,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cross-env": "^10.1.0",
     "electron": "^33.4.11",
     "electron-builder": "^25.1.8",
     "eslint": "^9",
